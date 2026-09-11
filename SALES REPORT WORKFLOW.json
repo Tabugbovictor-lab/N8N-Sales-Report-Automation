@@ -1,0 +1,266 @@
+{
+  "name": "SALES REPORT WORKFLOW",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "CAMPUS BUSINESS FORM",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "CLIENT NAME/ ORGANIZER",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "EVENT DETAILS",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "AGREED AMOUNT",
+              "fieldType": "number"
+            },
+            {
+              "fieldLabel": "MEETING NOTE",
+              "fieldType": "textarea"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8015d310-04ee-4460-8977-ecc12c802d3a",
+      "name": "On form submission",
+      "webhookId": "7db38334-c067-4b3c-9579-7a4cc72fdb70"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a sales assistant for an equipment rental business. Analyze the booking notes and output ONLY raw JSON matching the required schema.\n\nInput Data:\n- Client Name: {{ $json['CLIENT NAME/ ORGANIZER'] }}\n- Event Details:{{ $json['EVENT DETAILS'] }}\n- Amount: {{ $json['AGREED AMOUNT'] }}\n- Notes: {{ $json['MEETING NOTE'] }}\n\nDo not wrap the JSON in markdown backticks. Return strictly a JSON object:\n{\n  \"client_name\": \"Name of client and event\",\n  \"service_scope\": \"Brief summary of equipment requested\",\n  \"deal_value\": \"Financial value agreed upon\",\n  \"core_pain_point\": \"Key concern or issue raised by the client\",\n  \"client_sentiment\": \"Ready to Close / Interested / Hesitant\",\n  \"executive_summary\": \"1-2 sentence executive summary of agreement\",\n  \"next_action\": \"Clear next step with deadline\"\n}",
+        "messages": {
+          "messageValues": []
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        240,
+        0
+      ],
+      "id": "cfd27460-1894-4f73-8572-2ee537cfc6c7",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        576,
+        16
+      ],
+      "id": "57e25cb8-2f46-426e-8fe9-27e6b90e54d2",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "T2oIZ3xWRwgvxKYy",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "let text = $json.text || $json.content || \"\";\ntext = text.replace(/```json|```/g, \"\").trim();\n\ntry {\n  return JSON.parse(text);\n} catch (e) {\n  return { raw_output: text };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        0
+      ],
+      "id": "d5d8b7e6-451d-4341-ace5-9b9d11e9e36f",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1clndjGfwF-p4t94lkAFI3PDLqj0bwMLu77-3_M-QBwI",
+          "mode": "list",
+          "cachedResultName": "AI FEEDBACK ASSIGNMENT",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1clndjGfwF-p4t94lkAFI3PDLqj0bwMLu77-3_M-QBwI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 972269181,
+          "mode": "list",
+          "cachedResultName": "RESPONSES 2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1clndjGfwF-p4t94lkAFI3PDLqj0bwMLu77-3_M-QBwI/edit#gid=972269181"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "CLIENT/ EVENT": "={{ $json.client_name }}",
+            "SERVICE SCOPE": "={{ $json.service_scope }}",
+            "DEAL VALUE(NGN)": "={{ $json.deal_value }}",
+            "CORE PAIN POINT": "={{ $json.core_pain_point }}",
+            "CLIENT SENTIMENT": "={{ $json.client_sentiment }}",
+            "EXECUTIVE SUMMARY": "={{ $json.executive_summary }}",
+            "NEXT ACTION ITEM": "={{ $json.next_action }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "CLIENT/ EVENT",
+              "displayName": "CLIENT/ EVENT",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "SERVICE SCOPE",
+              "displayName": "SERVICE SCOPE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "DEAL VALUE(NGN)",
+              "displayName": "DEAL VALUE(NGN)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CORE PAIN POINT",
+              "displayName": "CORE PAIN POINT",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CLIENT SENTIMENT",
+              "displayName": "CLIENT SENTIMENT",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "EXECUTIVE SUMMARY",
+              "displayName": "EXECUTIVE SUMMARY",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "NEXT ACTION ITEM",
+              "displayName": "NEXT ACTION ITEM",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        992,
+        0
+      ],
+      "id": "433eeddf-15bf-4fd3-bade-a50143f9e89a",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "piYQC7O8XbHqIcju",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1c3b3efd-0a47-47cd-93ae-1a5816aa474e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "153c6d0f176a7bc51c63022db812a4b77988410214a9b5faac5c7a524543b94e"
+  },
+  "nodeGroups": [],
+  "id": "8dYKo1QqJqNzb8Se",
+  "tags": []
+}
